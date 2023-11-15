@@ -50,8 +50,6 @@ onMounted(async () => {
       theme: "vs-dark",
       automaticLayout: true,
     });
-
-    editor.setModel;
   });
 
   document.addEventListener("keydown", function (event) {
@@ -61,13 +59,26 @@ onMounted(async () => {
   });
 });
 
-async function loadFile(fileName) {
+async function loadFile(fileName, fileType) {
+  // Fetch the new function
   let file = await db.getFile(fileName);
 
+  // Save the current data in the function before leaving
   saveFile(currentFile.value, editor.getValue());
 
+  // Save the old editor for disposing
+  let oldEditor = editor.getModel();
+
+  // Helper webpack stuff
+  await loader.init().then(async (monaco) => {
+    // Create new model and set it.
+    editor.setModel(monaco.editor.createModel(file.data, fileType));
+  });
+
+  // dispose old editor
+  oldEditor.dispose();
+
   currentFile.value = fileName;
-  await editor.setValue(file.data);
 }
 
 async function saveFile(fileName, data) {

@@ -56,10 +56,10 @@ async function newProject() {
 
   await db.addFiles([
     {
-      name: "balance",
-      data: `module.exports = async function (state, action) {
-  return "hi"
-}`,
+      name: "function",
+      data: `module.exports = async function handle(state, action) {
+  
+};`,
     },
     {
       name: "state",

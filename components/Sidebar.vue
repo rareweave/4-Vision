@@ -64,7 +64,7 @@
           <li>
             <div v-for="(file, index) in files" :key="index">
               <button
-                @click.prevent.stop="emit('loadFile', file.name)"
+                @click.prevent.stop="emit('loadFile', file.name, 'javascript')"
                 class="flex text-lg group place-content-center sideButton pt-1 mt-2 pb-1 rounded-lg text-white text-xl w-full justify-center mx-auto"
               >
                 {{ file.name }}
@@ -90,7 +90,7 @@
         <ul class="space-y-2 font-medium mb-1">
           <li>
             <button
-              @click.prevent.stop="emit('loadFile', 'state')"
+              @click.prevent.stop="emit('loadFile', 'state', 'json')"
               class="flex items-center text-gray-900 w-full text-lg group rounded-lg place-content-center sideButton text-white text-center text-xl p-1 mt-2"
             >
               State
