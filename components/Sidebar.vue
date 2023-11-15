@@ -64,8 +64,11 @@
           <li>
             <div v-for="(file, index) in files" :key="index">
               <button
-                @click.prevent.stop="emit('loadFile', file.name, 'javascript')"
-                class="flex text-lg group place-content-center sideButton pt-1 mt-2 pb-1 rounded-lg text-white text-xl w-full justify-center mx-auto"
+                @click.prevent.stop="loadFunc(file.name, 'javascript')"
+                :class="[
+                  'flex text-lg group place-content-center sideButton pt-1 mt-2 pb-1 rounded-lg text-white text-xl w-full justify-center mx-auto',
+                  { selected: currentFile === file.name },
+                ]"
               >
                 {{ file.name }}
               </button>
@@ -90,8 +93,11 @@
         <ul class="space-y-2 font-medium mb-1">
           <li>
             <button
-              @click.prevent.stop="emit('loadFile', 'state', 'json')"
-              class="flex items-center text-gray-900 w-full text-lg group rounded-lg place-content-center sideButton text-white text-center text-xl p-1 mt-2"
+              @click.prevent.stop="loadFunc('state', 'json')"
+              :class="[
+                'flex items-center text-gray-900 w-full text-lg group rounded-lg place-content-center sideButton text-white text-center text-xl p-1 mt-2',
+                { selected: currentFile === 'state' },
+              ]"
             >
               State
             </button>
@@ -164,6 +170,8 @@ const emit = defineEmits(["loadFile"]);
 let createModalOpened = ref(false);
 let fileName = ref("");
 
+let currentFile = ref("");
+
 onMounted(async () => {
   await loadFuncs();
 });
@@ -178,6 +186,11 @@ async function loadFuncs() {
   const funcs = await db.getFiles();
 
   files.value = funcs.filter((file) => file.name !== "state"); // State isnt meant to be shown in the bar
+}
+
+async function loadFunc(fileName, fileType) {
+  currentFile.value = fileName;
+  emit("loadFile", fileName, fileType);
 }
 </script>
 
@@ -205,5 +218,9 @@ async function loadFuncs() {
 
 .sidebar {
   background-color: #111;
+}
+
+.selected {
+  background-color: #0984fb;
 }
 </style>

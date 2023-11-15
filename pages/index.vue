@@ -30,7 +30,6 @@
 
 <script setup>
 import loader from "@monaco-editor/loader";
-
 import { fileTree } from "../core/fileTree";
 
 let db = new fileTree("Functions");
@@ -41,8 +40,8 @@ let editor;
 
 onMounted(async () => {
   let files = await db.getFiles();
-
   currentFile.value = files[0].name;
+
   loader.init().then(async (monaco) => {
     editor = monaco.editor.create(document.getElementById("editor"), {
       value: files[0].data,
