@@ -51,15 +51,21 @@ if (!("indexedDB" in window)) {
 }
 
 async function newProject() {
-  await db.deleteFunctions();
+  await db.deleteFiles();
   await db._init();
 
-  await db.addFunction(
-    "balance",
-    `module.exports = async function (state, action) {
-    return "hi"
-};`
-  );
+  await db.addFiles([
+    {
+      name: "balance",
+      data: `module.exports = async function (state, action) {
+  return "hi"
+}`,
+    },
+    {
+      name: "state",
+      data: `{}`,
+    },
+  ]);
 
   startScreen.value = false;
 }

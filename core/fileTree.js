@@ -18,17 +18,20 @@ export class fileTree {
     });
   }
 
-  async addFunction(funcName, data) {
+  async addFiles(functionsArray) {
     const tx = this.db.transaction("functions", "readwrite");
     const store = tx.objectStore("functions");
-    await store.add({
-      name: funcName,
-      data,
-    });
+    for (const func of functionsArray) {
+      console.log(func);
+      await store.add({
+        name: func.name,
+        data: func.data,
+      });
+    }
     await tx.done;
   }
 
-  async saveFunction(funcName, data) {
+  async saveFile(funcName, data) {
     const tx = this.db.transaction("functions", "readwrite");
     const store = tx.objectStore("functions");
     const existingData = await store.get(funcName);
@@ -43,17 +46,17 @@ export class fileTree {
     await tx.done;
   }
 
-  async getFunction(funcName) {
+  async getFile(funcName) {
     const tx = this.db.transaction("functions", "readonly");
     const store = tx.objectStore("functions");
     return store.get(funcName);
   }
 
-  async getFunctions() {
+  async getFiles() {
     return this.db.getAll("functions");
   }
 
-  async deleteFunctions() {
+  async deleteFiles() {
     await deleteDB(this._name);
   }
 }

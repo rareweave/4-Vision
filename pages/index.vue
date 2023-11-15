@@ -40,7 +40,7 @@ let currentFile = ref();
 let editor;
 
 onMounted(async () => {
-  let files = await db.getFunctions();
+  let files = await db.getFiles();
 
   currentFile.value = files[0].name;
   loader.init().then(async (monaco) => {
@@ -50,6 +50,8 @@ onMounted(async () => {
       theme: "vs-dark",
       automaticLayout: true,
     });
+
+    editor.setModel;
   });
 
   document.addEventListener("keydown", function (event) {
@@ -60,7 +62,7 @@ onMounted(async () => {
 });
 
 async function loadFile(fileName) {
-  let file = await db.getFunction(fileName);
+  let file = await db.getFile(fileName);
 
   saveFile(currentFile.value, editor.getValue());
 
@@ -69,7 +71,7 @@ async function loadFile(fileName) {
 }
 
 async function saveFile(fileName, data) {
-  await db.saveFunction(fileName, data);
+  await db.saveFile(fileName, data);
 }
 </script>
 

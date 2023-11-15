@@ -90,6 +90,7 @@
         <ul class="space-y-2 font-medium mb-1">
           <li>
             <button
+              @click.prevent.stop="emit('loadFile', 'state')"
               class="flex items-center text-gray-900 w-full text-lg group rounded-lg place-content-center sideButton text-white text-center text-xl p-1 mt-2"
             >
               State
@@ -169,12 +170,14 @@ onMounted(async () => {
 
 async function funcCreate() {
   createModalOpened.value = false;
-  await db.addFunction(fileName.value, "Start Writing");
+  await db.addFiles([{ name: fileName.value, data: "Start Writing" }]);
   await loadFuncs();
 }
 
 async function loadFuncs() {
-  files.value = await db.getFunctions();
+  const funcs = await db.getFiles();
+
+  files.value = funcs.filter((file) => file.name !== "state"); // State isnt meant to be shown in the bar
 }
 </script>
 
