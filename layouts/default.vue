@@ -51,15 +51,16 @@ if (!("indexedDB" in window)) {
 }
 
 async function newProject() {
-  await db.deleteFiles();
+  console.log(await db.deleteFiles());
+
   await db._init();
 
   await db.addFiles([
     {
-      name: "function",
-      data: `module.exports = async function handle(state, action) {
-  
-};`,
+      name: "coolFunction",
+      data: `(state, action) => {
+  // Function logic here
+}`,
     },
     {
       name: "state",

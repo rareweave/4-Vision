@@ -1,4 +1,4 @@
-import { openDB, deleteDB, wrap, unwrap } from "idb";
+import { openDB, deleteDB } from "idb";
 
 export class fileTree {
   constructor(name) {
@@ -57,6 +57,6 @@ export class fileTree {
   }
 
   async deleteFiles() {
-    await deleteDB(this._name);
+    console.log(await deleteDB(this._name));
   }
 }
