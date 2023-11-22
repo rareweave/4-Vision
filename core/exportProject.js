@@ -26,7 +26,7 @@ async function generateCode() {
 
   // Export all the functions as a variable
   const functionExport = functions.reduce((accumulator, { name, data }) => {
-    return `${accumulator}const ${name} = ${data}\n`;
+    return `${accumulator}const ${name}_1 = ${data}\n`;
   }, "");
 
   const contractExport = `
@@ -36,7 +36,7 @@ async function handle(state, action) {
     throw new ContractError("Invalid input");
   }
   const functionMap = {
-${functions.map(({ name }) => `    "${name}": ${name},`).join("\n")}
+${functions.map(({ name }) => `    "${name}": ${name}_1,`).join("\n")}
   };
   const selectedFunction = functionMap[action.input.function];
   if (!selectedFunction) {

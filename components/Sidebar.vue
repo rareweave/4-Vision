@@ -178,7 +178,14 @@ onMounted(async () => {
 
 async function funcCreate() {
   createModalOpened.value = false;
-  await db.addFiles([{ name: fileName.value, data: "Start Writing" }]);
+  await db.addFiles([
+    {
+      name: fileName.value,
+      data: `(state, action) => {
+  // Function logic here
+}`,
+    },
+  ]);
   await loadFuncs();
 }
 
