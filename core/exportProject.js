@@ -1,5 +1,6 @@
 import { fileTree as FileTree } from "./fileTree";
 import * as Babel from "@babel/standalone";
+import { useProjectName } from "../composables/useState";
 
 // Probably also not the best way to do this IDK
 
@@ -15,7 +16,8 @@ export default async function exportProject(projectName) {
 }
 
 async function generateCode() {
-  let fileTree = new FileTree("Functions");
+  let projectName = useProjectName();
+  let fileTree = new FileTree(projectName.value);
   await fileTree._init();
 
   // Fetches all the functions

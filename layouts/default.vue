@@ -8,30 +8,87 @@
     />
 
     <div class="modal">
-      <div class="modal-box">
+      <div class="modal-box w-2/5 h-2/3 text-center">
         <div class="py-4 flex justify-center">
-          <div
-            class="card card-compact m-2 w-1/3 bg-base-200 cursor-pointer"
-            @click="newProject"
+          <svg
+            class="h-15 me-3 sm:h-20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <div class="card-body w-full flex bg-neutral">
-              <h2 class="card-title w-full block text-center font-mono">
-                Start Fresh
-              </h2>
-            </div>
-          </div>
-          <!-- ArConnect uses own encryption method, which is not normal RSA encryption and not compatible with most software -->
-          <div
-            class="card card-compact m-2 w-1/3 bg-base-200 cursor-pointer"
-            @click="startLastSave"
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              <path
+                d="M3 14C3 9.02944 7.02944 5 12 5C16.9706 5 21 9.02944 21 14M17 14C17 16.7614 14.7614 19 12 19C9.23858 19 7 16.7614 7 14C7 11.2386 9.23858 9 12 9C14.7614 9 17 11.2386 17 14Z"
+                stroke="#0984fb"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </g>
+          </svg>
+          <span
+            class="self-center text-5xl font-semibold whitespace-nowrap text-white text-center"
+            ><span class="">4</span> Vision</span
           >
-            <div class="card-body w-full flex bg-neutral">
-              <h2 class="card-title w-full block text-center font-mono">
-                Use last
-              </h2>
-            </div>
-          </div>
         </div>
+        <h1 class="text-4xl font-bold text-white">Project Selector</h1>
+        <div class="py-4 flex text-center">
+          <ul class="space-y-2 font-medium mb-1 mx-auto">
+            <li>
+              <div v-for="(project, index) in projects" :key="index">
+                <button
+                  @click.prevent.stop="loadProject(project.name)"
+                  class="flex justify-center sideButton p-2 mt-2 rounded-lg text-white text-xl w-[200px] mx-auto"
+                >
+                  {{ project.name }}
+                </button>
+              </div>
+
+              <div class="flex items-center justify-center">
+                <label
+                  class="sideButton p-2 mt-4 rounded-lg text-white text-xl w-[150px] mx-auto text-[32px] text-center"
+                  for="create-modal"
+                >
+                  +
+                </label>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <input
+      type="checkbox"
+      id="create-modal"
+      class="modal-toggle"
+      :checked="false"
+      v-model="createModalOpened"
+    />
+    <div class="modal">
+      <div class="modal-box w-2/12 h-1/5 flex flex-col">
+        <label for="create-modal" class="btn btn-sm absolute right-2 top-2"
+          >✕</label
+        >
+        <h3 class="font-bold text-lg text-center">Create Project</h3>
+        <form class="modal-action" @submit.prevent="projectCreate">
+          <input
+            v-model="projectName"
+            class="input input-bordered w-full rounded-lg p-2"
+            type="text"
+            required
+            placeholder="Project Name"
+          />
+          <button type="submit" class="btn btn-primary rounded-lg">
+            Create
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -42,12 +99,56 @@
 
 <script setup>
 import { fileTree } from "../core/fileTree";
-let startScreen = ref(true);
+import { useProjectName } from "../composables/useState";
 
-let db = new fileTree("Functions");
+let currentProjectName = useState("projectName", () => null);
+let createModalOpened = ref(false);
+let projectName = ref("");
+let projects = ref();
+let startScreen = ref(true);
 
 if (!("indexedDB" in window)) {
   alert("This browser doesn't support IndexedDB");
+}
+
+onMounted(async () => {
+  const promise = indexedDB.databases();
+  promise.then((databases) => {
+    console.log(databases);
+  });
+  await loadProjects();
+});
+
+async function loadProjects() {
+  const projectList = await indexedDB.databases();
+  projects.value = projectList.filter((file) => file.name !== "state"); // State isnt meant to be shown in the bar
+}
+
+async function projectCreate() {
+  let newDB = new fileTree(projectName.value);
+  await newDB._init();
+
+  await newDB.addFiles([
+    {
+      name: "coolFunction",
+      data: `(state, action) => {
+  // Function logic here
+}`,
+    },
+    {
+      name: "state",
+      data: `{}`,
+    },
+  ]);
+
+  await loadProjects();
+
+  createModalOpened.value = false;
+}
+
+async function loadProject(projectName) {
+  currentProjectName.value = projectName;
+  startScreen.value = false;
 }
 
 async function newProject() {
@@ -70,10 +171,23 @@ async function newProject() {
 
   startScreen.value = false;
 }
+</script>
 
-async function startLastSave() {
-  startScreen.value = false;
+<style scoped>
+.brand {
+  color: #0984fb;
 }
 
-async function loadArweaveTx() {}
-</script>
+.brand-background {
+  background-color: #0984fb;
+}
+
+.sideButton {
+  background-color: #0984fb;
+  transition: background-color 0.25s ease;
+}
+
+.sideButton:hover {
+  background-color: #0984fb;
+}
+</style>

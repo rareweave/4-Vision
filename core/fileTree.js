@@ -59,4 +59,6 @@ export class fileTree {
   async deleteFiles() {
     console.log(await deleteDB(this._name));
   }
+
+  async listFolders() {}
 }

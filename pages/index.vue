@@ -68,8 +68,10 @@
 import loader from "@monaco-editor/loader";
 import exportProject from "../core/exportProject";
 import { fileTree } from "../core/fileTree";
+import { useProjectName } from "../composables/useState";
 
-let db = new fileTree("Functions");
+let projectName = useProjectName();
+let db = new fileTree(projectName.value);
 await db._init();
 
 let currentFile = ref();

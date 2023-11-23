@@ -160,10 +160,11 @@
 
 <script setup>
 import { fileTree } from "../core/fileTree";
+import { useProjectName } from "../composables/useState";
 
-let db = new fileTree("Functions");
+let projectName = useProjectName();
+let db = new fileTree(projectName.value);
 await db._init();
-
 let files = ref();
 const emit = defineEmits(["loadFile"]);
 
@@ -191,6 +192,8 @@ async function funcCreate() {
 
 async function loadFuncs() {
   const funcs = await db.getFiles();
+
+  console.log(funcs);
 
   files.value = funcs.filter((file) => file.name !== "state"); // State isnt meant to be shown in the bar
 }
