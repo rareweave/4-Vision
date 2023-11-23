@@ -5,19 +5,19 @@ import { useProjectName } from "../composables/useState";
 // Probably also not the best way to do this IDK
 
 // Project to be implemnted, currently all one project
-export default async function exportProject(projectName) {
-  let contractCode = (await generateCode()).code;
+export default async function exportProject() {
+  let projectName = useProjectName();
+  let contractCode = (await generateCode(projectName.value)).code;
 
   let blob = new Blob([contractCode], { type: "text/plain" });
 
-  sendDownloadToClient(blob);
+  sendDownloadToClient(blob, `${projectName.value}.js`);
 
   return true;
 }
 
-async function generateCode() {
-  let projectName = useProjectName();
-  let fileTree = new FileTree(projectName.value);
+async function generateCode(projectName) {
+  let fileTree = new FileTree(projectName);
   await fileTree._init();
 
   // Fetches all the functions
@@ -62,10 +62,10 @@ ${functions.map(({ name }) => `    "${name}": ${name}_1,`).join("\n")}
   return TranspiledContract;
 }
 
-async function sendDownloadToClient(blob) {
+async function sendDownloadToClient(blob, name) {
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
-  link.download = "contract.js";
+  link.download = name;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
