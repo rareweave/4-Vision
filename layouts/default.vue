@@ -99,50 +99,29 @@
 
 <script setup>
 import { fileTree } from "../core/fileTree";
-import { useProjectName } from "../composables/useState";
 
 let currentProjectName = useState("projectName", () => null);
 let createModalOpened = ref(false);
 let projectName = ref("");
-let projects = ref();
+let projects = ref([]);
 let startScreen = ref(true);
 
 if (!("indexedDB" in window)) {
   alert("This browser doesn't support IndexedDB");
 }
 
-onMounted(async () => {
-  const promise = indexedDB.databases();
-  promise.then((databases) => {
-    console.log(databases);
-  });
-  await loadProjects();
-});
+onMounted(loadProjects);
 
 async function loadProjects() {
   const projectList = await indexedDB.databases();
-  projects.value = projectList.filter((file) => file.name !== "state"); // State isnt meant to be shown in the bar
+  projects.value = projectList.filter((file) => file.name !== "state");
 }
 
 async function projectCreate() {
   let newDB = new fileTree(projectName.value);
   await newDB._init();
-
-  await newDB.addFiles([
-    {
-      name: "coolFunction",
-      data: `(state, action) => {
-  // Function logic here
-}`,
-    },
-    {
-      name: "state",
-      data: `{}`,
-    },
-  ]);
-
+  await addFilesToDB(newDB);
   await loadProjects();
-
   createModalOpened.value = false;
 }
 
@@ -151,11 +130,7 @@ async function loadProject(projectName) {
   startScreen.value = false;
 }
 
-async function newProject() {
-  console.log(await db.deleteFiles());
-
-  await db._init();
-
+async function addFilesToDB(db) {
   await db.addFiles([
     {
       name: "coolFunction",
@@ -168,8 +143,6 @@ async function newProject() {
       data: `{}`,
     },
   ]);
-
-  startScreen.value = false;
 }
 </script>
 

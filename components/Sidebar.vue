@@ -162,20 +162,18 @@
 import { fileTree } from "../core/fileTree";
 import { useProjectName } from "../composables/useState";
 
-let projectName = useProjectName();
-let db = new fileTree(projectName.value);
+const projectName = useProjectName();
+const db = new fileTree(projectName.value);
 await db._init();
-let files = ref();
+const files = ref();
 const emit = defineEmits(["loadFile"]);
 
-let createModalOpened = ref(false);
-let fileName = ref("");
+const createModalOpened = ref(false);
+const fileName = ref("");
 
-let currentFile = ref("");
+const currentFile = ref("");
 
-onMounted(async () => {
-  await loadFuncs();
-});
+onMounted(loadFuncs);
 
 async function funcCreate() {
   createModalOpened.value = false;
@@ -192,10 +190,7 @@ async function funcCreate() {
 
 async function loadFuncs() {
   const funcs = await db.getFiles();
-
-  console.log(funcs);
-
-  files.value = funcs.filter((file) => file.name !== "state"); // State isnt meant to be shown in the bar
+  files.value = funcs.filter((file) => file.name !== "state");
 }
 
 async function loadFunc(fileName, fileType) {

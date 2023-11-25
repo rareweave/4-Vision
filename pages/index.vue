@@ -70,52 +70,53 @@ import exportProject from "../core/exportProject";
 import { fileTree } from "../core/fileTree";
 import { useProjectName } from "../composables/useState";
 
-let projectName = useProjectName();
-let db = new fileTree(projectName.value);
+const projectName = useProjectName();
+const db = new fileTree(projectName.value);
 await db._init();
 
 let currentFile = ref();
 let editor;
 
-onMounted(async () => {
-  let files = await db.getFiles();
+// Runs when page is loaded
+onMounted(initializeEditor);
+
+async function initializeEditor() {
+  const files = await db.getFiles();
   currentFile.value = files[0].name;
 
-  loader.init().then(async (monaco) => {
-    editor = monaco.editor.create(document.getElementById("editor"), {
-      value: files[0].data,
-      language: "javascript",
-      theme: "vs-dark",
-      automaticLayout: true,
-    });
+  await loader.init().then((monaco) => {
+    editor = createEditor(monaco, files[0].data);
   });
 
+  // Save file on Ctrl+S
   document.addEventListener("keydown", function (event) {
-    if (event.ctrlKey && event.key === "q") {
+    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+      event.preventDefault(); // Prevent the default Ctrl+S behavior
       saveFile(currentFile.value, editor.getValue());
     }
   });
-});
+}
+
+function createEditor(monaco, fileData) {
+  return monaco.editor.create(document.getElementById("editor"), {
+    value: fileData,
+    language: "javascript",
+    theme: "vs-dark",
+    automaticLayout: true,
+  });
+}
 
 async function loadFile(fileName, fileType) {
-  // Fetch the new function
-  let file = await db.getFile(fileName);
-
-  // Save the current data in the function before leaving
+  const file = await db.getFile(fileName);
   saveFile(currentFile.value, editor.getValue());
 
-  // Save the old editor for disposing
-  let oldEditor = editor.getModel();
+  const oldEditor = editor.getModel();
 
-  // Helper webpack stuff
-  await loader.init().then(async (monaco) => {
-    // Create new model and set it.
+  await loader.init().then((monaco) => {
     editor.setModel(monaco.editor.createModel(file.data, fileType));
   });
 
-  // dispose old editor
   oldEditor.dispose();
-
   currentFile.value = fileName;
 }
 
