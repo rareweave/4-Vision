@@ -17,21 +17,25 @@ export default async function exportProject() {
 }
 
 async function generateCode(projectName) {
-  let fileTree = new FileTree(projectName);
-  await fileTree._init();
+  try {
+    let fileTree = new FileTree(projectName);
+    await fileTree._init();
 
-  // Fetches all the functions
-  // Except for state, which isnt really a function
-  let functions = (await fileTree.getFiles()).filter(
-    (file) => file.name !== "state"
-  );
+    // Fetches all the functions
+    // Except for state, which isnt really a function
 
-  // Export all the functions as a variable
-  const functionExport = functions.reduce((accumulator, { name, data }) => {
-    return `${accumulator}const ${name}_1 = ${data}\n`;
-  }, "");
+    let files = await fileTree.getFiles();
+    let functionPromises = files.map((file) => file.name !== "state");
 
-  const contractExport = `
+    // Wait for all functions to be fetched
+    let functions = await Promise.all(functionPromises);
+
+    // Export all the functions as a variable
+    const functionExport = functions.reduce((accumulator, { name, data }) => {
+      return `${accumulator}const ${name}_1 = ${data}\n`;
+    }, "");
+
+    const contractExport = `
 ${functionExport}
 async function handle(state, action) {
   if (!action.input || typeof action.input !== "object" || typeof action.input.function !== "string") {
@@ -51,22 +55,30 @@ ${functions.map(({ name }) => `    "${name}": ${name}_1,`).join("\n")}
   }
 }`;
 
-  //Using babel convert the code to es5 (IE11)
-  let TranspiledContract = Babel.transform(contractExport, {
-    presets: ["env"],
-    targets: {
-      browsers: "ie 11",
-    },
-  });
+    //Using babel convert the code to es5 (IE11)
+    let TranspiledContract = Babel.transform(contractExport, {
+      presets: ["env"],
+      targets: {
+        browsers: "ie 11",
+      },
+    });
 
-  return TranspiledContract;
+    return TranspiledContract;
+  } catch (e) {
+    console.error(
+      `Error generating code for project ${projectName}: ${error.message}`
+    );
+    throw error; // or handle the error as needed
+  }
 }
 
-async function sendDownloadToClient(blob, name) {
+function sendDownloadToClient(blob, name) {
+  const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = window.URL.createObjectURL(blob);
+  link.href = url;
   link.download = name;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 }
