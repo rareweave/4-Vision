@@ -190,6 +190,7 @@ async function funcCreate() {
 
 async function loadFuncs() {
   const funcs = await db.getFiles();
+  currentFile.value = funcs[0].name;
   files.value = funcs.filter((file) => file.name !== "state");
 }
 
