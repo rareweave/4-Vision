@@ -24,11 +24,9 @@ async function generateCode(projectName) {
     // Fetches all the functions
     // Except for state, which isnt really a function
 
-    let files = await fileTree.getFiles();
-    let functionPromises = files.map((file) => file.name !== "state");
-
-    // Wait for all functions to be fetched
-    let functions = await Promise.all(functionPromises);
+    let functions = (await fileTree.getFiles()).filter(
+      (file) => file.name !== "state"
+    );
 
     // Export all the functions as a variable
     const functionExport = functions.reduce((accumulator, { name, data }) => {
@@ -66,9 +64,9 @@ ${functions.map(({ name }) => `    "${name}": ${name}_1,`).join("\n")}
     return TranspiledContract;
   } catch (e) {
     console.error(
-      `Error generating code for project ${projectName}: ${error.message}`
+      `Error generating code for project ${projectName}: ${e.message}`
     );
-    throw error; // or handle the error as needed
+    throw e; // or handle the error as needed
   }
 }
 
