@@ -22,7 +22,6 @@ export class fileTree {
     const tx = this.db.transaction("functions", "readwrite");
     const store = tx.objectStore("functions");
     for (const func of functionsArray) {
-      console.log(func);
       await store.add({
         name: func.name,
         data: func.data,

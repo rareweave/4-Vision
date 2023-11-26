@@ -16,7 +16,7 @@ export default async function exportProject() {
   return true;
 }
 
-async function generateCode(projectName) {
+export async function generateCode(projectName) {
   try {
     let fileTree = new FileTree(projectName);
     await fileTree._init();
