@@ -61,7 +61,7 @@
           <h1 class="text-lg font-bold">FUNCTION EXPLORER</h1>
         </div>
         <ul class="space-y-2 font-medium mb-1 mx-auto">
-          <li v-if="files?.length">
+          <li v-if="files?.filter((file) => file.name !== 'state').length">
             <div
               v-for="(file, index) in files.filter(
                 (file) => file.name !== 'state'
@@ -194,7 +194,9 @@ await db._init();
 const emit = defineEmits(["loadFile"]);
 
 // Load files on mount
-onMounted(loadFuncs);
+onMounted(async () => {
+  await loadFuncs();
+});
 
 // Function to create a new file
 async function createFunc() {
@@ -235,6 +237,7 @@ async function loadFuncs() {
   try {
     files.value = await db.getFiles();
     currentFile.value = files.value[0].name;
+    console.log(files);
   } catch (error) {
     console.error("Error loading files:", error);
   }
