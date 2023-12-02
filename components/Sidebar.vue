@@ -61,8 +61,14 @@
           <h1 class="text-lg font-bold">FUNCTION EXPLORER</h1>
         </div>
         <ul class="space-y-2 font-medium mb-1 mx-auto">
-          <li>
-            <div v-for="(file, index) in files" :key="index">
+          <li v-if="files?.length">
+            <div
+              v-for="(file, index) in files.filter(
+                (file) => file.name !== 'state'
+              )"
+              :key="index"
+              class="group relative"
+            >
               <button
                 @click.prevent.stop="loadFunc(file.name, 'javascript')"
                 :class="[
@@ -72,6 +78,17 @@
               >
                 {{ file.name }}
               </button>
+              <button
+                @click.prevent.stop="deleteFunc(file.name)"
+                class="invisible group-hover:visible absolute top-0 right-0 bg-red-500 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center"
+              >
+                X
+              </button>
+            </div>
+          </li>
+          <li v-else>
+            <div class="group relative">
+              <p>No Functions</p>
             </div>
           </li>
         </ul>
@@ -144,7 +161,7 @@
         >✕</label
       >
       <h3 class="font-bold text-lg text-center">Create Function</h3>
-      <form class="modal-action" @submit.prevent="funcCreate">
+      <form class="modal-action" @submit.prevent="createFunc">
         <input
           v-model="fileName"
           class="input input-bordered w-full rounded-lg p-2"
@@ -162,20 +179,25 @@
 import { fileTree } from "../core/fileTree";
 import { useProjectName } from "../composables/useState";
 
+// Declare refs
 const projectName = useProjectName();
-const db = new fileTree(projectName.value);
-await db._init();
 const files = ref();
-const emit = defineEmits(["loadFile"]);
-
 const createModalOpened = ref(false);
 const fileName = ref("");
-
 const currentFile = ref("");
 
+// Initialize fileTree
+const db = new fileTree(projectName.value);
+await db._init();
+
+// Define emits
+const emit = defineEmits(["loadFile"]);
+
+// Load files on mount
 onMounted(loadFuncs);
 
-async function funcCreate() {
+// Function to create a new file
+async function createFunc() {
   createModalOpened.value = false;
   await db.addFiles([
     {
@@ -186,17 +208,36 @@ async function funcCreate() {
     },
   ]);
   await loadFuncs();
+  await loadFunc(fileName.value, "javascript");
 }
 
-async function loadFuncs() {
-  const funcs = await db.getFiles();
-  currentFile.value = funcs[0].name;
-  files.value = funcs.filter((file) => file.name !== "state");
-}
-
+// Function to load a specific file
 async function loadFunc(fileName, fileType) {
   currentFile.value = fileName;
   emit("loadFile", fileName, fileType);
+}
+
+// Function to delete a specific file
+async function deleteFunc(fileName) {
+  try {
+    await db.deleteFile(fileName);
+    // Reloads all the functions in the list
+    await loadFuncs();
+    // Loads the first function in the list
+    await loadFunc(files.value[0].name, "javascript");
+  } catch (error) {
+    console.error("Error deleting file:", error);
+  }
+}
+
+// Function to load all files
+async function loadFuncs() {
+  try {
+    files.value = await db.getFiles();
+    currentFile.value = files.value[0].name;
+  } catch (error) {
+    console.error("Error loading files:", error);
+  }
 }
 </script>
 
@@ -228,5 +269,15 @@ async function loadFunc(fileName, fileType) {
 
 .selected {
   background-color: #0984fb;
+}
+
+.delete-icon {
+  display: none;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.delete-icon:hover .delete-icon {
+  display: inline;
 }
 </style>

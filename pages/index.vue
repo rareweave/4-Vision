@@ -1,7 +1,11 @@
 <template>
   <Sidebar @load-file="loadFile" />
   <div class="p-4 sm:ml-64">
-    <div class="editor" id="editor" />
+    <!-- When a code edior option is open -->
+    <div v-if="editorOpen" class="editor" id="editor" />
+
+    <!-- When plugins page is open -->
+    <div v-if="!editorOpen"></div>
     <div class="flex">
       <!-- Settings Button -->
       <div>
@@ -76,6 +80,7 @@ await db._init();
 
 let currentFile = ref();
 let editor;
+let editorOpen = ref(true);
 
 // Runs when page is loaded
 onMounted(initializeEditor);

@@ -45,6 +45,13 @@ export class fileTree {
     await tx.done;
   }
 
+  async deleteFile(funcName) {
+    const tx = this.db.transaction("functions", "readwrite");
+    const store = tx.objectStore("functions");
+    await store.delete(funcName);
+    await tx.done;
+  }
+
   async getFile(funcName) {
     const tx = this.db.transaction("functions", "readonly");
     const store = tx.objectStore("functions");
