@@ -276,7 +276,6 @@ async function loadFuncs() {
 
 .delete-icon {
   display: none;
-  margin-left: 8px;
   cursor: pointer;
 }
 
